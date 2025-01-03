@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thermal District Pipe Network Optimization</title>
+    <!-- Include Leaflet CSS -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+     <!-- Include Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""></script>
+
+
+
+    <!-- Set the height of the map container and sidebar -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        #title {
+            position: relative;
+            text-align: center;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            z-index: 100;
+        }
+        #sidebar {
+            position: absolute;
+            left: 0;
+            top: 120px; /* Adjust as needed based on title height */
+            height: calc(110vh); /* Adjust based on title height */
+            width: 200px;
+            background-color: #f8f9fa;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+        #map-container {
+            position: absolute;
+            top: 120px; /* Adjust as needed based on title height */
+            left: 200px; /* Adjust for sidebar width */
+            width: calc(100% - 200px); /* Adjust for sidebar width */
+            height: calc(100vh - 60px); /* Adjust based on title height */
+        }
+        #map {
+            height: 100%;
+        }
+        #coordinates {
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+        }
+        
+        .mab {
+            position: relative;
+            background: #dddddd;
+            display:inline-flex;
+            bottom: -90px;
+            left: 5px; /* Adjust as needed */
+             /* Adjust based on padding and margin */
+        }
+
+        .mab__button {
+            display: flex;
+            background: none;
+            align-items: center;
+            justify-content:center;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 1px 8px;
+            font-size: 16px;
+        }
+
+        .mab__button:hover {
+            background-color: #0056b3;
+        }
+
+        .mab__button:not(.mab__button--menu) .mab__icon{
+            margin-right:8px;
+        }
+
+        .mab__button--secondary{
+            width:100%;
+        }
+
+        .mab__list{
+            position:absolute;
+            display:None;
+            top:115%;
+            right:0;
+            padding: 5px 0;
+            background: #ffffff;
+            box-shadow: 0 0 2px rgba(0,0,0,0.2);
+        }
+
+        .mab__list--visible{
+            display:initial;
+        }
+
+
+
+        #clearCoordinatesContainer {
+            /* Your existing styles */
+            position: relative;
+            bottom: -10px;
+            left: 3px;
+            z-index: 1000;
+        }
+
+        #clearCoordinates {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            background-color: #dc3545; /* Red color for clearing */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #clearCoordinates:hover {
+            background-color: #bd2130;
+        }
+        
+        #instructions {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1000;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+                /* Shared style for all text box labels */
+        .custom-label {
+            font-weight: bold;
+            color: blue;
+            margin-bottom: 5px;
+            font-size: 10px;
+        }
+
+        #total-distance {
+            position: absolute;
+            top: 30px; /* Adjust as needed to avoid overlap with instructions */
+            right: 60px;
+            z-index: 1000;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+    </style>
+</head>
+<body>
+    <!-- Title -->
+    <div id="title">
+        <h1>Pipe Network Optimization for DES</h1>
+    </div>
+
+    <!-- Sidebar -->
+    <div id="sidebar">
+        <h2>Pipelines details</h2>
+        <!-- Add your sidebar content here -->
+        <p>Please provide the following data:</p>
+        <div>
+            <label for="textbox1" class="custom-label">Internal diameter of the pipe [m]</label>
+            <input type="number" id="textbox1" name="textbox1">
+        </div>
+        <div>
+            <label for="textbox2" class="custom-label">Thickness of the pipe [m]</label>
+            <input type="number" id="textbox2" name="textbox2">
+        </div>
+        <div>
+            <label for="textbox3" class="custom-label">Thermal conductivity of the pipe [W/m.k]</label>
+            <input type="number" id="textbox3" name="textbox3">
+        </div>
+        <div>
+            <label for="textbox4" class="custom-label">Thickness of the insulation [m]</label>
+            <input type="number" id="textbox4" name="textbox4">
+        </div>
+        <div>
+            <label for="textbox5" class="custom-label">Thermal conductivity of the insulation [W/m.k]</label>
+            <input type="number" id="textbox5" name="textbox5">
+        </div>
+        <div>
+            <label for="textbox6" class="custom-label">Emmissivity of the pipe</label>
+            <input type="number" id="textbox6" name="textbox6">
+        </div>
+        <div>
+            <label for="textbox7" class="custom-label">Ambient temperature [°C]</label>
+            <input type="number" id="textbox7" name="textbox7">
+        </div>
+        <div>
+            <label for="textbox8" class="custom-label">Ground temperature [°C]</label>
+            <input type="number" id="textbox8" name="textbox8">
+        </div>
+        <div>
+            <label for="textbox9" class="custom-label">Air velocity [m/s]</label>
+            <input type="number" id="textbox9" name="textbox9">
+        </div>
+        <div>
+            <label for="textbox9" class="custom-label">Mean irradiance [kW/m2/day]</label>
+            <input type="number" id="textbox10" name="textbox10">
+        </div>
+        <div class="mab">
+            <button type="button" id="calculateButton" class="mab__button mab__button--primary">
+                <span class="material-icons mab__icon">calculate</span>
+                <span class="mab__text">Calculate</span>
+            </button>
+            <button type="button" class="mab__button mab__button--menu">
+                <span class="material-icons mab__icon">expand_more</span>
+            </button>
+            <div class="mab__list mab__list--visible">
+                <button type="button" id="heating" class="mab__button mab__button--secondary">
+                    <span class="mab__text">Heating</span>
+                </button>
+                <button type="button" id="cooling" class="mab__button mab__button--secondary">
+                    <span class="mab__text">Cooling</span>
+                </button>
+            </div>
+        </div>
+        <!-- Container for the button to clear coordinates -->
+        <div id="clearCoordinatesContainer">
+            <button id="clearCoordinates">Clear Selection</button>
+        </div>
+    </div>
+
+    <!-- Map Container -->
+    <div id="map-container">
+        <!-- Create a div element to hold the map -->
+        <div id="map">
+            <!-- Instructions for the user -->
+            <div id="instructions">
+                <strong>Instructions:</strong><br>
+                1. Right click on a point to select a red building.<br>
+                2. Left click on a point to select a blue building.<br>
+                3. Before pressing any other button press the calculate button.<br>
+                4. Click the menu button and select the option suitable for your application.<br>
+                5. Use the "Clear Selection" button to start over.<br>
+            </div>
+            <div id="total-distance">
+                <strong>Total Distance:</strong> 0
+            </div>
+        </div>
+
+        <!-- Create a div element to display the coordinates -->
+        <div id="coordinates">Coordinates: Latitude, Longitude</div>
+    </div>
+
+    <!-- Include your JavaScript file for map functionality -->
+    <script src="index.js"></script>
+</body>
+</html>
