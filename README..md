@@ -2,12 +2,12 @@
 
 ### To start the program, perform the following steps:
 
-1. Navigate to the folder where your project is saved by typing in the terminal:  
+1. Navigate to the folder where your project is saved by typing in the terminal:
    ```bash
    cd "path-to-folder"
    ```
 
-2. Initialize the `main.py` file to start the Flask server by typing:  
+2. Run the `main.py` file to start the Flask server by typing:
    ```bash
    python main.py
    ```
@@ -52,12 +52,36 @@ This app is comprised of six main files:
 
 ## Required Libraries and Extensions
 
+It is recommended to use VSCode for developing and debugging the code.
+
 ### Extensions for VSCode:
 
-- **PyLance**  
-- **Python**  
-- **Python Debugger**  
-- **Prettier - Code Formatter**  
+- **PyLance**
+- **Python**
+- **Python Debugger**
+- **Prettier - Code Formatter**
+- **Live Server**
+
+#### Important
+After installing Live Server:
+
+1. Use the shortcut `Ctrl+,` to open the settings.
+2. In the search bar, type `liveServer`.
+3. Scroll down until you find **Live Server > Settings: Ignore Files**.
+4. Click the hyperlink "Edit in settings.json".
+5. Verify that the `liveServer.settings.ignoreFiles` contains the following:
+
+   ```json
+   "liveServer.settings.ignoreFiles": [
+       ".vscode/**",
+       "**/*.scss",
+       "**/*.sass",
+       "**/*.ts",
+       "**"
+   ]
+   ```
+
+   Usually, this JSON does not contain the double asterisks at the end (`"**"`). Please add them and restart your computer. Without them, the page will reload every time a form is submitted.
 
 ### Libraries Required for the App:
 
@@ -68,4 +92,8 @@ Flask-Cors        4.0.0
 Flask-SQLAlchemy  3.1.1
 geopy             2.4.1
 ```
+
+**Python Version** 3.12.1 is required due to compatibility issues with the CoolProp library.
+
+Install Microsoft C++ tools for proper functionality.
 
